@@ -9,7 +9,7 @@ import random
 from typing import Optional, Callable, Dict, Any
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                              QSlider, QPushButton, QComboBox, QCheckBox,
-                             QGroupBox, QSpinBox)
+                             QGroupBox, QSpinBox, QApplication)
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtCore import Qt, QTimer, QUrl, Signal
 import qtawesome as qta
@@ -38,6 +38,30 @@ class MixerTrackWidget(QWidget):
         self._setup_timers()
         # Set default loop
         self._on_loop_toggled(self.loop_check.isChecked())
+        self.retranslate_ui()  # Initial retranslation after setup
+
+    def tr(self, text: str) -> str:
+        """Translate text using QApplication's translate method."""
+        return QApplication.translate("MixerTrackWidget", text)
+
+    def retranslate_ui(self):
+        """Retranslate all UI elements in the widget."""
+        from pathlib import Path
+        sound_name = Path(self.sound_file).stem
+        self.info_group.setTitle(self.tr(sound_name))
+        self.volume_label_text.setText(self.tr("Volume:"))
+        self.automation_group.setTitle(self.tr("Automation"))
+        self.volume_auto_check.setText(self.tr("Volume Auto"))
+        self.speed_label.setText(self.tr("Speed:"))
+        self.speed_combo.setItemText(0, self.tr("Slow (10s)"))
+        self.speed_combo.setItemText(1, self.tr("Medium (5s)"))
+        self.speed_combo.setItemText(2, self.tr("Fast (2s)"))
+        self.playback_auto_check.setText(self.tr("Auto Playback"))
+        self.interval_combo.setItemText(0, self.tr("Fixed"))
+        self.interval_combo.setItemText(1, self.tr("Random"))
+        self.every_label.setText(self.tr("Every"))
+        self.interval_spin.setSuffix(self.tr("s"))
+        self.loop_check.setText(self.tr("Loop"))
 
     def _setup_audio(self):
         """Initialize QMediaPlayer and audio output."""
@@ -61,12 +85,13 @@ class MixerTrackWidget(QWidget):
         from pathlib import Path
         sound_name = Path(self.sound_file).stem
         
-        info_group = QGroupBox(self.tr(sound_name))
-        info_layout = QVBoxLayout(info_group)
+        self.info_group = QGroupBox(self.tr(sound_name))
+        info_layout = QVBoxLayout(self.info_group)
         
         # Volume control
         volume_layout = QHBoxLayout()
-        volume_layout.addWidget(QLabel(self.tr("Volume:")))
+        self.volume_label_text = QLabel(self.tr("Volume:"))
+        volume_layout.addWidget(self.volume_label_text)
         
         self.volume_slider = QSlider(Qt.Orientation.Horizontal)
         self.volume_slider.setRange(0, 100)
@@ -86,9 +111,8 @@ class MixerTrackWidget(QWidget):
         controls_layout = QHBoxLayout()
 
         # Play/Stop button
-        self.play_icon = qta.icon('fa5s.play', color='#555555')
-        self.stop_icon = qta.icon('fa5s.stop', color='#555555')
-        self.play_button = QPushButton(self.play_icon, self.tr(" Play"))
+        self.play_button = QPushButton("")
+        self.play_button.setIcon(self.play_icon if hasattr(self, 'play_icon') else qta.icon('fa5s.play', color='#555555'))
         self.play_button.clicked.connect(self._toggle_playback)
         controls_layout.addWidget(self.play_button)
         
@@ -102,8 +126,8 @@ class MixerTrackWidget(QWidget):
         info_layout.addLayout(controls_layout)
         
         # Automation controls
-        automation_group = QGroupBox(self.tr("Automation"))
-        automation_layout = QVBoxLayout(automation_group)
+        self.automation_group = QGroupBox(self.tr("Automation"))
+        automation_layout = QVBoxLayout(self.automation_group)
         
         # Volume automation
         vol_auto_layout = QHBoxLayout()
@@ -112,7 +136,8 @@ class MixerTrackWidget(QWidget):
         vol_auto_layout.addWidget(self.volume_auto_check)
         
         # Automation speed
-        vol_auto_layout.addWidget(QLabel(self.tr("Speed:")))
+        self.speed_label = QLabel(self.tr("Speed:"))
+        vol_auto_layout.addWidget(self.speed_label)
         self.speed_combo = QComboBox()
         self.speed_combo.addItems([self.tr("Slow (10s)"), self.tr("Medium (5s)"), self.tr("Fast (2s)")])
         self.speed_combo.setCurrentIndex(1)  # Default to Medium
@@ -138,7 +163,8 @@ class MixerTrackWidget(QWidget):
         self.interval_spin.setRange(1, 120)
         self.interval_spin.setValue(20)
         self.interval_spin.setSuffix(self.tr("s"))
-        playback_layout.addWidget(QLabel(self.tr("Every")))
+        self.every_label = QLabel(self.tr("Every"))
+        playback_layout.addWidget(self.every_label)
         playback_layout.addWidget(self.interval_spin)
         
         automation_layout.addLayout(playback_layout)
@@ -149,8 +175,8 @@ class MixerTrackWidget(QWidget):
         self.loop_check.toggled.connect(self._on_loop_toggled)
         automation_layout.addWidget(self.loop_check)
 
-        layout.addWidget(info_group)
-        layout.addWidget(automation_group)
+        layout.addWidget(self.info_group)
+        layout.addWidget(self.automation_group)
         
         # Set touch-friendly sizes
         self.setMinimumWidth(300)
@@ -188,11 +214,9 @@ class MixerTrackWidget(QWidget):
             
         if self.is_playing:
             self.player.pause()
-            self.play_button.setText(self.tr("▶️ Play"))
             self.is_playing = False
         else:
             self.player.play()
-            self.play_button.setText(self.tr("⏸️ Pause"))
             self.is_playing = True
     
     def _remove_track(self):
@@ -256,7 +280,7 @@ class MixerTrackWidget(QWidget):
             
         interval_seconds = self.interval_spin.value()
         
-        if self.interval_combo.currentText() == "Random":
+        if self.interval_combo.currentIndex() == 1:  # Index 1 is Random
             # Random interval between half and double the specified value
             min_interval = max(1, interval_seconds // 2)
             max_interval = interval_seconds * 2
@@ -271,26 +295,6 @@ class MixerTrackWidget(QWidget):
         
         # Schedule next playback
         self._schedule_next_playback()
-
-    def _start_playback(self):
-        """Start playback."""
-        if not self.player:
-            return
-            
-        self.player.play()
-        self.play_button.setText(self.tr(" Pause"))
-        self.play_button.setIcon(self.stop_icon)
-        self.is_playing = True
-
-    def _stop_playback(self):
-        """Stop playback."""
-        if not self.player:
-            return
-            
-        self.player.pause()
-        self.play_button.setText(self.tr(" Play"))
-        self.play_button.setIcon(self.play_icon)
-        self.is_playing = False
 
     def get_state(self) -> Dict[str, Any]:
         """Get current track state for session saving."""

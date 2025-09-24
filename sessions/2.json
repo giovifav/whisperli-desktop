@@ -1,0 +1,49 @@
+{
+  "version": "1.0",
+  "tracks": [
+    {
+      "sound_file": "sounds\\transport\\landing_braking_.mp3",
+      "volume": 50,
+      "loop": true,
+      "volume_auto": false,
+      "playback_auto": false,
+      "speed": 1,
+      "interval_type": 0,
+      "interval": 20
+    },
+    {
+      "sound_file": "sounds\\transport\\takeoff_cough_.mp3",
+      "volume": 50,
+      "loop": true,
+      "volume_auto": false,
+      "playback_auto": false,
+      "speed": 1,
+      "interval_type": 0,
+      "interval": 20
+    },
+    {
+      "sound_file": "sounds\\transport\\train_long_freight_train.mp3",
+      "volume": 50,
+      "loop": true,
+      "volume_auto": false,
+      "playback_auto": false,
+      "speed": 1,
+      "interval_type": 0,
+      "interval": 20
+    },
+    {
+      "sound_file": "sounds\\transport\\train_train_station_pass.mp3",
+      "volume": 50,
+      "loop": true,
+      "volume_auto": false,
+      "playback_auto": false,
+      "speed": 1,
+      "interval_type": 0,
+      "interval": 20
+    }
+  ],
+  "metadata": {
+    "name": "2",
+    "description": "Ambient mixer session with 4 tracks"
+  }
+}

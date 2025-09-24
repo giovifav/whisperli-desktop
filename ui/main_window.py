@@ -11,8 +11,8 @@ from pathlib import Path
 
 from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSplitter,
                              QPushButton, QLabel, QFileDialog, QMessageBox, QMenuBar, QMenu,
-                             QTreeView, QSizePolicy, QStatusBar, QScrollArea)
-from PySide6.QtCore import Qt, Signal, QSize, QTimer
+                             QTreeView, QSizePolicy, QStatusBar, QScrollArea, QApplication)
+from PySide6.QtCore import Qt, Signal, QSize, QTimer, QLocale
 from PySide6.QtGui import QAction, QIcon
 import qtawesome as qta
 from core.sound_manager import SoundManager
@@ -24,6 +24,8 @@ from ui.sound_library_widget import SoundLibraryWidget
 
 class MainWindow(QMainWindow):
     """Main application window."""
+
+    language_changed = Signal(str) # Signal to notify main.py of language change
     
     def __init__(self):
         super().__init__()
@@ -40,33 +42,33 @@ class MainWindow(QMainWindow):
     
     def _setup_ui(self):
         """Set up the main user interface."""
-        self.setWindowTitle(self.tr("Ambient Sound Mixer"))
+        self.setWindowTitle("Ambient Sound Mixer") # Set initial title without tr()
         self.setGeometry(100, 100, 1200, 800)
         
         # Central widget
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
+        self.central_widget = QWidget()
+        self.setCentralWidget(self.central_widget)
         
         # Main layout
-        main_layout = QVBoxLayout(central_widget)
+        self.main_layout = QVBoxLayout(self.central_widget)
         
         # Create splitter for resizable panels
-        splitter = QSplitter(Qt.Orientation.Horizontal)
+        self.splitter = QSplitter(Qt.Orientation.Horizontal)
         
         # Left panel - Sound Library
-        left_panel = self._create_sound_library_panel()
-        splitter.addWidget(left_panel)
+        self.left_panel = self._create_sound_library_panel()
+        self.splitter.addWidget(self.left_panel)
         
         # Right panel - Mixer
-        right_panel = self._create_mixer_panel()
-        splitter.addWidget(right_panel)
+        self.right_panel = self._create_mixer_panel()
+        self.splitter.addWidget(self.right_panel)
         
         # Set splitter proportions
-        splitter.setStretchFactor(0, 1)  # Left panel
-        splitter.setStretchFactor(1, 2)  # Right panel
-        splitter.setSizes([400, 800])
+        self.splitter.setStretchFactor(0, 1)  # Left panel
+        self.splitter.setStretchFactor(1, 2)  # Right panel
+        self.splitter.setSizes([400, 800])
         
-        main_layout.addWidget(splitter)
+        self.main_layout.addWidget(self.splitter)
         
         # Status bar
         self.status_bar = QStatusBar()
@@ -79,8 +81,8 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout(panel)
         
         # Header
-        header = QLabel(self.tr("Sound Library"))
-        layout.addWidget(header)
+        self.sound_library_header = QLabel(self.tr("Sound Library"))
+        layout.addWidget(self.sound_library_header)
         
         # Sound library tree view
         self.sound_library = SoundLibraryWidget()
@@ -93,10 +95,10 @@ class MainWindow(QMainWindow):
         
         # Refresh button with qtawesome icon
         refresh_icon = qta.icon('fa5s.sync-alt', color='#555555')
-        refresh_btn = QPushButton(refresh_icon, self.tr(" Refresh Library"))
-        refresh_btn.clicked.connect(self._refresh_sound_library)
-        refresh_btn.setMinimumHeight(35)
-        layout.addWidget(refresh_btn)
+        self.refresh_btn = QPushButton(refresh_icon, self.tr(" Refresh Library"))
+        self.refresh_btn.clicked.connect(self._refresh_sound_library)
+        self.refresh_btn.setMinimumHeight(35)
+        layout.addWidget(self.refresh_btn)
         
         return panel
     
@@ -108,37 +110,37 @@ class MainWindow(QMainWindow):
         # Header with controls
         header_layout = QHBoxLayout()
         
-        header = QLabel(self.tr("Mixer Panel"))
-        header_layout.addWidget(header)
+        self.mixer_panel_header = QLabel(self.tr("Mixer Panel"))
+        header_layout.addWidget(self.mixer_panel_header)
         
         header_layout.addStretch()
         
         # Play All button
         play_all_icon = qta.icon('fa5s.play-circle', color='#ff9800')
-        play_all_btn = QPushButton(play_all_icon, self.tr(" Play All"))
-        play_all_btn.clicked.connect(self._play_all_tracks)
-        play_all_btn.setMinimumHeight(35)
-        header_layout.addWidget(play_all_btn)
+        self.play_all_btn = QPushButton(play_all_icon, self.tr(" Play All"))
+        self.play_all_btn.clicked.connect(self._play_all_tracks)
+        self.play_all_btn.setMinimumHeight(35)
+        header_layout.addWidget(self.play_all_btn)
 
         # Clear Mixer button
         clear_icon = qta.icon('fa5s.trash-alt', color='#f44336')
-        clear_btn = QPushButton(clear_icon, self.tr(" Clear Mixer"))
-        clear_btn.clicked.connect(self._clear_mixer)
-        clear_btn.setMinimumHeight(35)
-        header_layout.addWidget(clear_btn)
+        self.clear_btn = QPushButton(clear_icon, self.tr(" Clear Mixer"))
+        self.clear_btn.clicked.connect(self._clear_mixer)
+        self.clear_btn.setMinimumHeight(35)
+        header_layout.addWidget(self.clear_btn)
 
         # Session controls
         save_icon = qta.icon('fa5s.save', color='#2e7d32')
-        save_btn = QPushButton(save_icon, self.tr(" Save Session"))
-        save_btn.clicked.connect(self._save_session)
-        save_btn.setMinimumHeight(35)
-        header_layout.addWidget(save_btn)
+        self.save_btn = QPushButton(save_icon, self.tr(" Save Session"))
+        self.save_btn.clicked.connect(self._save_session)
+        self.save_btn.setMinimumHeight(35)
+        header_layout.addWidget(self.save_btn)
 
         load_icon = qta.icon('fa5s.folder-open', color='#1976d2')
-        load_btn = QPushButton(load_icon, self.tr(" Load Session"))
-        load_btn.clicked.connect(self._load_session)
-        load_btn.setMinimumHeight(35)
-        header_layout.addWidget(load_btn)
+        self.load_btn = QPushButton(load_icon, self.tr(" Load Session"))
+        self.load_btn.clicked.connect(self._load_session)
+        self.load_btn.setMinimumHeight(35)
+        header_layout.addWidget(self.load_btn)
         
         layout.addLayout(header_layout)
         
@@ -174,7 +176,7 @@ class MainWindow(QMainWindow):
         menubar = self.menuBar()
         
         # File menu
-        file_menu = menubar.addMenu(self.tr("&File"))
+        self.file_menu = menubar.addMenu(self.tr("&File"))
         
         # Icons for menu actions
         save_icon = qta.icon('fa5s.save', color='#2e7d32')
@@ -182,54 +184,67 @@ class MainWindow(QMainWindow):
         import_icon = qta.icon('fa5s.file-import', color='#2196f3')
 
         # Import sounds action
-        import_action = QAction(import_icon, self.tr("&Import Sounds"), self)
-        import_action.setShortcut("Ctrl+I")
-        import_action.triggered.connect(self._import_sounds)
-        file_menu.addAction(import_action)
+        self.import_action = QAction(import_icon, self.tr("&Import Sounds"), self)
+        self.import_action.setShortcut("Ctrl+I")
+        self.import_action.triggered.connect(self._import_sounds)
+        self.file_menu.addAction(self.import_action)
 
         # Save session action
-        save_action = QAction(save_icon, self.tr("&Save Session"), self)
-        save_action.setShortcut("Ctrl+S")
-        save_action.triggered.connect(self._save_session)
-        file_menu.addAction(save_action)
+        self.save_action = QAction(save_icon, self.tr("&Save Session"), self)
+        self.save_action.setShortcut("Ctrl+S")
+        self.save_action.triggered.connect(self._save_session)
+        self.file_menu.addAction(self.save_action)
 
         # Load session action
-        load_action = QAction(load_icon, self.tr("&Load Session"), self)
-        load_action.setShortcut("Ctrl+O")
-        load_action.triggered.connect(self._load_session)
-        file_menu.addAction(load_action)
+        self.load_action = QAction(load_icon, self.tr("&Load Session"), self)
+        self.load_action.setShortcut("Ctrl+O")
+        self.load_action.triggered.connect(self._load_session)
+        self.file_menu.addAction(self.load_action)
 
-        file_menu.addSeparator()
+        self.file_menu.addSeparator()
         
         # Exit action
-        exit_action = QAction(self.tr("E&xit"), self)
-        exit_action.setShortcut("Ctrl+Q")
-        exit_action.triggered.connect(self.close)
-        file_menu.addAction(exit_action)
+        self.exit_action = QAction(self.tr("E&xit"), self)
+        self.exit_action.setShortcut("Ctrl+Q")
+        self.exit_action.triggered.connect(self.close)
+        self.file_menu.addAction(self.exit_action)
         
         # View menu
-        view_menu = menubar.addMenu(self.tr("&View"))
+        self.view_menu = menubar.addMenu(self.tr("&View"))
 
         # Theme submenu
-        theme_menu = view_menu.addMenu(self.tr("&Theme"))
+        self.theme_menu = self.view_menu.addMenu(self.tr("&Theme"))
 
         # Light theme action
-        light_theme_action = QAction(self.tr("&Light Theme"), self)
-        light_theme_action.triggered.connect(lambda: self._set_theme(ThemeManager.LIGHT_THEME))
-        theme_menu.addAction(light_theme_action)
+        self.light_theme_action = QAction(self.tr("&Light Theme"), self)
+        self.light_theme_action.triggered.connect(lambda: self._set_theme(ThemeManager.LIGHT_THEME))
+        self.theme_menu.addAction(self.light_theme_action)
 
         # Dark theme action
-        dark_theme_action = QAction(self.tr("&Dark Theme"), self)
-        dark_theme_action.triggered.connect(lambda: self._set_theme(ThemeManager.DARK_THEME))
-        theme_menu.addAction(dark_theme_action)
+        self.dark_theme_action = QAction(self.tr("&Dark Theme"), self)
+        self.dark_theme_action.triggered.connect(lambda: self._set_theme(ThemeManager.DARK_THEME))
+        self.theme_menu.addAction(self.dark_theme_action)
 
-        view_menu.addSeparator()
+        self.view_menu.addSeparator()
 
         # Refresh library action
-        refresh_action = QAction(self.tr("&Refresh Library"), self)
-        refresh_action.setShortcut("F5")
-        refresh_action.triggered.connect(self._refresh_sound_library)
-        view_menu.addAction(refresh_action)
+        self.refresh_action = QAction(self.tr("&Refresh Library"), self)
+        self.refresh_action.setShortcut("F5")
+        self.refresh_action.triggered.connect(self._refresh_sound_library)
+        self.view_menu.addAction(self.refresh_action)
+        
+        # Language submenu
+        self.language_menu = self.view_menu.addMenu(self.tr("&Language"))
+
+        # English language action
+        self.en_action = QAction(self.tr("&English"), self)
+        self.en_action.triggered.connect(lambda: self._set_language("en_US"))
+        self.language_menu.addAction(self.en_action)
+
+        # Italian language action
+        self.it_action = QAction(self.tr("&Italian"), self)
+        self.it_action.triggered.connect(lambda: self._set_language("it_IT"))
+        self.language_menu.addAction(self.it_action)
     
     def _setup_theme(self):
         """Set up the initial theme."""
@@ -243,7 +258,47 @@ class MainWindow(QMainWindow):
         """Set up signal connections."""
         self.sound_manager.sounds_updated.connect(self._populate_sound_library)
         self.session_manager.session_loaded.connect(self._restore_session)
-    
+        
+    def _set_language(self, locale: str):
+        """Set the application language."""
+        self.language_changed.emit(locale)
+
+    def _retranslate_ui(self):
+        """Retranslate all UI elements."""
+        self.setWindowTitle(self.tr("Ambient Sound Mixer"))
+        self.sound_library_header.setText(self.tr("Sound Library"))
+        self.refresh_btn.setText(self.tr(" Refresh Library"))
+        self.mixer_panel_header.setText(self.tr("Mixer Panel"))
+        self.play_all_btn.setText(self.tr(" Play All"))
+        self.clear_btn.setText(self.tr(" Clear Mixer"))
+        self.save_btn.setText(self.tr(" Save Session"))
+        self.load_btn.setText(self.tr(" Load Session"))
+        self._update_track_count()
+        
+        # Retranslate menus
+        self.file_menu.setTitle(self.tr("&File"))
+        self.import_action.setText(self.tr("&Import Sounds"))
+        self.save_action.setText(self.tr("&Save Session"))
+        self.load_action.setText(self.tr("&Load Session"))
+        self.exit_action.setText(self.tr("E&xit"))
+        
+        self.view_menu.setTitle(self.tr("&View"))
+        self.theme_menu.setTitle(self.tr("&Theme"))
+        self.light_theme_action.setText(self.tr("&Light Theme"))
+        self.dark_theme_action.setText(self.tr("&Dark Theme"))
+        self.refresh_action.setText(self.tr("&Refresh Library"))
+        self.language_menu.setTitle(self.tr("&Language"))
+        self.en_action.setText(self.tr("&English"))
+        self.it_action.setText(self.tr("&Italian"))
+
+        # Update status bar message
+        self.status_bar.showMessage(self.tr("Ready - Add sounds from the library to start mixing"))
+
+        # Retranslate children widgets if they have their own tr() calls
+        for track_widget in self.tracks.values():
+            track_widget.retranslate_ui() # Assuming MixerTrackWidget has a retranslate_ui method
+        self.sound_library.retranslate_ui() # Assuming SoundLibraryWidget has a retranslate_ui method
+
     def _load_initial_sounds(self):
         """Load initial sound library."""
         self._populate_sound_library()
@@ -278,7 +333,7 @@ class MainWindow(QMainWindow):
                 if successful_imports > 0:
                     # Refresh the library to show newly imported sounds
                     self.sound_manager.refresh()
-                    self.status_bar.showMessage(self.tr(f"Imported {successful_imports} sound{'s' if successful_imports != 1 else ''} successfully"), 3000)
+                    self.status_bar.showMessage(self.tr("Imported {} sound(s) successfully").format(successful_imports), 3000)
                 else:
                     QMessageBox.warning(self, self.tr("Import Failed"),
                                       self.tr("No valid audio files were imported."))
@@ -289,13 +344,13 @@ class MainWindow(QMainWindow):
         """Add a sound track to the mixer."""
         if sound_file in self.tracks:
             QMessageBox.information(self, self.tr("Already Added"),
-                                  self.tr(f"{Path(sound_file).stem} is already in the mixer."))
+                                  self.tr("{} is already in the mixer.").format(Path(sound_file).stem))
             return
         
         # Check if sound file exists
         if not os.path.exists(sound_file):
             QMessageBox.warning(self, self.tr("File Not Found"),
-                              self.tr(f"Sound file not found: {sound_file}"))
+                              self.tr("Sound file not found: {}").format(sound_file))
             return
         
         # Create track widget
@@ -309,7 +364,7 @@ class MainWindow(QMainWindow):
         self._update_track_count()
         
         sound_name = Path(sound_file).stem
-        self.status_bar.showMessage(self.tr(f"Added {sound_name} to mixer"), 2000)
+        self.status_bar.showMessage(self.tr("Added {} to mixer").format(sound_name), 2000)
     
     def _remove_track(self, sound_file: str):
         """Remove a track from the mixer."""
@@ -322,7 +377,7 @@ class MainWindow(QMainWindow):
             self._update_track_count()
             
             sound_name = Path(sound_file).stem
-            self.status_bar.showMessage(self.tr(f"Removed {sound_name} from mixer"), 2000)
+            self.status_bar.showMessage(self.tr("Removed {} from mixer").format(sound_name), 2000)
     
     def _update_track_count(self):
         """Update the track count label."""
@@ -332,7 +387,7 @@ class MainWindow(QMainWindow):
         elif count == 1:
             self.track_count_label.setText(self.tr("1 track loaded"))
         else:
-            self.track_count_label.setText(self.tr(f"{count} tracks loaded"))
+            self.track_count_label.setText(self.tr("{} tracks loaded").format(count))
     
     def _save_session(self):
         """Save the current mixer session."""
@@ -360,7 +415,7 @@ class MainWindow(QMainWindow):
             
             if self.session_manager.save_session(session_data, Path(filename).stem):
                 QMessageBox.information(self, self.tr("Success"),
-                                      self.tr(f"Session saved as {Path(filename).stem}"))
+                                      self.tr("Session saved as {}").format(Path(filename).stem))
             else:
                 QMessageBox.warning(self, self.tr("Error"), self.tr("Failed to save session"))
     
@@ -372,7 +427,7 @@ class MainWindow(QMainWindow):
         if ok and filename:
             session = self.session_manager.load_session(filename)
             if session:
-                self.status_bar.showMessage(self.tr(f"Loaded session: {Path(filename).stem}"), 3000)
+                self.status_bar.showMessage(self.tr("Loaded session: {}").format(Path(filename).stem), 3000)
     
     def _restore_session(self, session: Dict[str, Any]):
         """Restore mixer state from session data."""
@@ -392,9 +447,9 @@ class MainWindow(QMainWindow):
                     self.tracks[sound_file].set_state(track_data)
                     loaded_count += 1
             else:
-                print(self.tr(f"Skipping missing sound file: {sound_file}"))
-        
-        self.status_bar.showMessage(self.tr(f"Restored {loaded_count} tracks from session"), 3000)
+                print(self.tr("Skipping missing sound file: {}").format(sound_file))
+
+        self.status_bar.showMessage(self.tr("Restored {} tracks from session").format(loaded_count), 3000)
     
     def _play_all_tracks(self):
         """Play all tracks in the mixer that are not already playing."""
@@ -411,7 +466,7 @@ class MainWindow(QMainWindow):
         if played_count == 0:
             self.status_bar.showMessage(self.tr("All tracks are already playing"), 2000)
         else:
-            self.status_bar.showMessage(self.tr(f"Started {played_count} track{'s' if played_count != 1 else ''}"), 2000)
+            self.status_bar.showMessage(self.tr("Started {} track(s)").format(played_count), 2000)
 
     def _clear_mixer(self):
         """Clear all tracks from the mixer."""
@@ -424,7 +479,7 @@ class MainWindow(QMainWindow):
         for sound_file in list(self.tracks.keys()):
             self._remove_track(sound_file)
 
-        self.status_bar.showMessage(self.tr(f"Cleared {track_count} track{'s' if track_count != 1 else ''} from mixer"), 2000)
+        self.status_bar.showMessage(self.tr("Cleared {} track(s) from mixer").format(track_count), 2000)
 
     def closeEvent(self, event):
         """Handle application close event."""

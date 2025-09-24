@@ -8,7 +8,7 @@ import os
 from typing import Dict, List, Optional, Any
 
 from PySide6.QtWidgets import (QTreeView, QVBoxLayout,
-                             QWidget, QAbstractItemView, QMenu)
+                             QWidget, QAbstractItemView, QMenu, QApplication)
 from PySide6.QtCore import Qt, QDir, Signal, QModelIndex, QPoint, QSize
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QAction, QIcon, QFont, QColor
 import qtawesome as qta
@@ -37,10 +37,15 @@ class SoundLibraryWidget(QWidget):
         super().__init__(parent)
         self.sound_manager = None
         self._setup_ui()
+        self.retranslate_ui() # Initial retranslation after setup
 
     def tr(self, text: str) -> str:
         """Translate text using QApplication's translate method."""
         return QApplication.translate("SoundLibraryWidget", text)
+
+    def retranslate_ui(self):
+        """Retranslate all UI elements in the widget."""
+        self._update_tree() # Rebuild the tree to retranslate category names and context menu actions
     
     def _setup_ui(self):
         """Set up the user interface."""

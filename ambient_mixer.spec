@@ -58,6 +58,7 @@ a = Analysis(
     datas=[
         ('sounds', 'sounds'),
         ('sessions', 'sessions'),
+        ('translations', 'translations'),
     ] + collect_data_files('qtawesome', subdir='fonts'),
     hiddenimports=[
         'PySide6.QtSvg', 'qtawesome',
@@ -77,6 +78,7 @@ a = Analysis(
     noarchive=False,
     optimize=2,  # Ottimizzazione a livello di bytecode
     upx=True,  # Abilita UPX per i file binari
+    upx_dir=r'C:\Users\jo\Documents\upx-5.0.2-win64',
     upx_exclude=[],
     name='AmbientSoundMixer',
     upx_compress=True,
@@ -99,10 +101,10 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=True,
     strip=False,  # Disabilitato per evitare problemi con Qt/GUI
-    upx=False,    # UPX può causare problemi a volte
+    upx=True,     # Abilita UPX per comprimere l'eseguibile
     upx_exclude=[],
-    upx_compress=False,
-    upx_best=False,
+    upx_compress=True,
+    upx_best=True,
     runtime_tmpdir=None,
     console=False,
     disable_windowed_traceback=True,

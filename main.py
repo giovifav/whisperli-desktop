@@ -12,14 +12,15 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QDir, QTranslator, QLocale
 from PySide6.QtGui import QIcon
 
-
 # Add project root to Python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from ui.main_window import MainWindow
+from core.settings import SettingsManager
 
-# Global variable to hold the translator
+# Global variables
 _translator = None
+_settings_manager = SettingsManager()
 
 
 def main():
@@ -33,16 +34,30 @@ def main():
     app.setStyle('Fusion')
 
     # Initialize translator
-    global _translator
+    global _translator, _settings_manager
     _translator = QTranslator()
-    # Load default language (e.g., English)
-    load_translator(app, QLocale.system().name())
+    # Load saved language or system default
+    saved_locale = _settings_manager.get_language()
+    load_translator(app, saved_locale)
 
-    # Create and show main window
+    # Create main window
     window = MainWindow()
+    window.language_changed.connect(lambda locale: on_language_changed(app, window, locale))
+
+    # Trigger initial retranslation with the loaded language
+    on_language_changed(app, window, saved_locale)
+
     window.show()
 
     return app.exec()
+
+
+def on_language_changed(app: QApplication, window: MainWindow, locale: str):
+    """Handles language change requests from the main window."""
+    global _settings_manager
+    _settings_manager.set_language(locale)
+    load_translator(app, locale)
+    window._retranslate_ui() # Call retranslate_ui on the main window instance
 
 
 def load_translator(app: QApplication, locale: str):

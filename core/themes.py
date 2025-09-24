@@ -1,52 +1,52 @@
 """
 Theme Manager for Ambient Sound Mixer
 
-Handles application themes (light/dark) with styling and persistence.
+Handles application themes (light/dark) with styling.
+Persistence is handled by SettingsManager.
 """
 
-from PySide6.QtCore import QSettings
 from PySide6.QtWidgets import QApplication
+from core.settings import SettingsManager
 
 
 class ThemeManager:
     """Manages application themes and styling."""
 
-    LIGHT_THEME = "light"
-    DARK_THEME = "dark"
+    LIGHT_THEME = SettingsManager.LIGHT_THEME
+    DARK_THEME = SettingsManager.DARK_THEME
 
     def __init__(self):
-        self.settings = QSettings("Ambient Mixer", "Ambient Sound Mixer")
-        self.current_theme = self.settings.value("theme", self.LIGHT_THEME)
+        self.settings_manager = SettingsManager()
         self._load_theme()
 
     def _load_theme(self):
         """Load and apply the current theme."""
-        if self.current_theme == self.DARK_THEME:
+        if self.settings_manager.is_dark_theme():
             self._apply_dark_theme()
         else:
             self._apply_light_theme()
 
-    def set_theme(self, theme):
+    def set_theme(self, theme: str):
         """Set the theme to light or dark."""
         if theme not in [self.LIGHT_THEME, self.DARK_THEME]:
             return
 
-        self.current_theme = theme
-        self.settings.setValue("theme", theme)
+        self.settings_manager.set_theme(theme)
         self._load_theme()
 
     def toggle_theme(self):
         """Switch between light and dark themes."""
-        new_theme = self.DARK_THEME if self.current_theme == self.LIGHT_THEME else self.LIGHT_THEME
+        current_theme = self.settings_manager.get_theme()
+        new_theme = self.DARK_THEME if current_theme == self.LIGHT_THEME else self.LIGHT_THEME
         self.set_theme(new_theme)
 
     def get_current_theme(self):
         """Return the current theme."""
-        return self.current_theme
+        return self.settings_manager.get_theme()
 
     def is_dark(self):
         """Check if the current theme is dark."""
-        return self.current_theme == self.DARK_THEME
+        return self.settings_manager.is_dark_theme()
 
     def apply_theme(self):
         """Apply the current theme to the application (legacy method)."""
