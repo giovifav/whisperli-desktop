@@ -1,0 +1,59 @@
+{
+  "version": "1.0",
+  "tracks": [
+    {
+      "sound_file": "sounds\\Nature Various\\nature_various1.ogg",
+      "volume": 50,
+      "loop": false,
+      "volume_auto": false,
+      "playback_auto": false,
+      "speed": 1,
+      "interval_type": 0,
+      "interval": 20
+    },
+    {
+      "sound_file": "sounds\\Nature Various\\nature_various4.ogg",
+      "volume": 50,
+      "loop": false,
+      "volume_auto": false,
+      "playback_auto": false,
+      "speed": 1,
+      "interval_type": 0,
+      "interval": 20
+    },
+    {
+      "sound_file": "sounds\\Nature Various\\nature_various11.ogg",
+      "volume": 50,
+      "loop": false,
+      "volume_auto": false,
+      "playback_auto": false,
+      "speed": 1,
+      "interval_type": 0,
+      "interval": 20
+    },
+    {
+      "sound_file": "sounds\\Farm\\chickens.ogg",
+      "volume": 50,
+      "loop": false,
+      "volume_auto": false,
+      "playback_auto": false,
+      "speed": 1,
+      "interval_type": 0,
+      "interval": 20
+    },
+    {
+      "sound_file": "sounds\\Farm\\chickens_5.ogg",
+      "volume": 50,
+      "loop": false,
+      "volume_auto": false,
+      "playback_auto": false,
+      "speed": 1,
+      "interval_type": 0,
+      "interval": 20
+    }
+  ],
+  "metadata": {
+    "name": "test",
+    "description": "Ambient mixer session with 5 tracks"
+  }
+}

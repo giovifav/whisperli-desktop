@@ -1,0 +1,40 @@
+{
+  "version": "1.0",
+  "tracks": [
+    {
+      "sound_file": "sounds/Nature/forest.ogg",
+      "volume": 65,
+      "loop": true,
+      "volume_auto": false,
+      "playback_auto": false,
+      "speed": 1,
+      "interval_type": 0,
+      "interval": 20
+    },
+    {
+      "sound_file": "sounds/Water/waves.ogg",
+      "volume": 45,
+      "loop": true,
+      "volume_auto": true,
+      "playback_auto": false,
+      "speed": 1,
+      "interval_type": 0,
+      "interval": 15
+    },
+    {
+      "sound_file": "sounds/Nature/rain.ogg",
+      "volume": 30,
+      "loop": true,
+      "volume_auto": false,
+      "playback_auto": true,
+      "speed": 2,
+      "interval_type": 1,
+      "interval": 25
+    }
+  ],
+  "metadata": {
+    "name": "Relaxing Nature Mix",
+    "description": "A calming mix of forest sounds, gentle waves, and occasional rain",
+    "created": "2024-07-30"
+  }
+}

@@ -1,0 +1,5 @@
+- [x] Analyze the CSS styling issue in the tree view
+- [ ] Update the selected item background color from blue to green
+- [ ] Ensure text color is white for visibility on selected items
+- [ ] Update hover background if needed
+- [ ] Verify the changes work as expected

@@ -1,0 +1,29 @@
+{
+  "version": "1.0",
+  "tracks": [
+    {
+      "sound_file": "sounds\\People Sport\\people_sport_basketball_street.ogg",
+      "volume": 45,
+      "loop": true,
+      "volume_auto": true,
+      "playback_auto": false,
+      "speed": 1,
+      "interval_type": 0,
+      "interval": 20
+    },
+    {
+      "sound_file": "sounds\\Rain\\and.ogg",
+      "volume": 50,
+      "loop": true,
+      "volume_auto": false,
+      "playback_auto": false,
+      "speed": 1,
+      "interval_type": 0,
+      "interval": 20
+    }
+  ],
+  "metadata": {
+    "name": "111",
+    "description": "Ambient mixer session with 2 tracks"
+  }
+}
